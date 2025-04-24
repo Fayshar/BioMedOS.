@@ -1,28 +1,18 @@
-from fastapi import FastAPI
-from pydantic import BaseSettings
-import uvicorn
-
-class Settings(BaseSettings):
-    APP_PORT: int
-    RX_NORM_API_URL: str
-    DRUG_SAFETY_API: str
-    DATABASE_URL: str
-    GOOGLE_CLOUD_CREDENTIALS: str
-
-    class Config:
-        env_file = ".env"
-
-settings = Settings()
+from fastapi import FastAPI, Depends
+from api.v1.routes import clinical
 
 app = FastAPI(
     title="BioMedOS Clinical AI",
-    version="1.0.0",
-    docs_url="/api/docs"
+    version="3.0",
+    docs_url="/api/docs",
+    redoc_url=None
 )
 
-@app.get("/health")
-async def health_check():
-    return {"status": "ok"}
+app.include_router(
+    clinical.router,
+    prefix="/api/v1/clinical"
+)
 
-if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=settings.APP_PORT)
+@app.get("/")
+def read_root():
+    return {"message": "Welcome to BioMedOS"}
